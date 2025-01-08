@@ -1,7 +1,9 @@
-FILENAME = "sample_input.txt"
-#FILENAME = "input.txt"
+# Input is so short this time I didn't bother to parse it, but just typed it in manually.
+input_codes = ["029A", "980A", "179A", "456A", "379A"] #sample input numbers
+# input_codes = ["780A", "539A", "341A", "189A", "682A"] #real input numbers
 
 import time
+from functools import lru_cache
 
 keypad = {
         "7": (0,0),
@@ -25,15 +27,12 @@ directional_pad = {
         ">": (1,2),
     }
 
-input_numbers = [29, 980, 179, 456, 379]
-
+number_of_robots = 2
 
 def main():
 
-    data = parse_data()
-
-    answer1 = part1(data)
-    answer2 = part2(data)
+    answer1 = part1()
+    answer2 = part2()
 
     print()
     print("--------Part 1 Answer-------------")
@@ -43,136 +42,112 @@ def main():
     print(answer2)
     print()
 
+def keypad_move(position, end_position):
+    key_moves = ""
+    end_position = keypad[end_position]
+    # print(f"End position: {end_position}")
+    while position != end_position:
+        # print(f"Starting while loop with position {position}.")
+        change_y = end_position[0]-position[0]
+        change_x = end_position[1]-position[1]
+        # print(f"Change in y is {change_y} and change in x is {change_x}")
+        if change_x > 0:
+            next_position = (position[0], position[1]+1)
+            key_moves += ">"
+        elif change_y > 0:
+            next_position = (position[0]+1, position[1])
+            key_moves += "v"
+        elif change_y < 0:
+            next_position = (position[0]-1, position[1])
+            key_moves += "^"
+        elif change_x < 0:
+            next_position = (position[0], position[1]-1)
+            key_moves += "<"
+        position = next_position
+    return key_moves, end_position
 
-def parse_data():
-    with open(FILENAME, "r") as f:
-        data = f.readlines()
-    codes = []
-    for row in data:
-        new_line = []
-        for item in row.strip():
-            new_line.append(item)
-        codes.append(new_line)
-    return codes
-
-
-def part1(data):
-
-    robot1_start = (3,2)
-    position = robot1_start
-
-    at_keypad_move = []
-    for code in data:
-        key_moves = ""
-        for key in code:
-            # print(f"Key = {key}")
-            end_position = keypad[key]
-            # print(f"End position: {end_position}")
-            while position != end_position:
-                # print(f"Starting while loop with position {position}.")
-                change_y = end_position[0]-position[0]
-                change_x = end_position[1]-position[1]
-                # print(f"Change in y is {change_y} and change in x is {change_x}")
-                if change_y < 0:
-                    next_position = (position[0]-1, position[1])
-                    key_moves += "^"
-                elif change_x > 0:
-                    next_position = (position[0], position[1]+1)
-                    key_moves += ">"
-                elif change_y > 0:
-                    next_position = (position[0]+1, position[1])
-                    key_moves += "v"
-                elif change_x < 0:
-                    next_position = (position[0], position[1]-1)
-                    key_moves += "<"
-                
-                position = next_position
-                # print(f"Current list of moves: {key_moves}")
-            key_moves += "A"
-            # print(f"Current list of moves: {key_moves}")
-        at_keypad_move.append(key_moves)
-
-    print(at_keypad_move[0])
-
-
-    robot2_start = (0,2)
-    position = robot2_start
-
-    second_robot_moves = []
-    for move in at_keypad_move:
-        key_moves = ""
-        for char in move:
-            print(f"Key = {key}")
-            end_position = directional_pad[char]
-            print(f"End position: {end_position}")
-            while position != end_position:
-                print(f"Starting while loop with position {position}.")
-                change_y = end_position[0]-position[0]
-                change_x = end_position[1]-position[1]
-                print(f"Change in y is {change_y} and change in x is {change_x}")
-                if change_y > 0:
-                    next_position = (position[0]+1, position[1])
-                    key_moves += "v"
-                elif change_x > 0:
-                    next_position = (position[0], position[1]+1)
-                    key_moves += ">"
-                elif change_x < 0:
-                    next_position = (position[0], position[1]-1)
-                    key_moves += "<"
-                elif change_y < 0:
-                    next_position = (position[0]-1, position[1])
-                    key_moves += "^"
-                
-                position = next_position
-                print(f"Current list of moves: {key_moves}")
-            key_moves += "A"
-            print(f"Current list of moves: {key_moves}")
-        second_robot_moves.append(key_moves)
+@lru_cache
+def directional_move(position, end_position):
+    key_moves = ""
+    end_position = directional_pad[end_position]
+    print(f"End position: {end_position}")
+    while position != end_position:
+        print(f"Starting while loop with position {position}.")
+        change_y = end_position[0]-position[0]
+        change_x = end_position[1]-position[1]
+        print(f"Change in y is {change_y} and change in x is {change_x}")
+        if change_x > 0:
+            next_position = (position[0], position[1]+1)
+            key_moves += ">"
+        elif change_y > 0:
+            next_position = (position[0]+1, position[1])
+            key_moves += "v"
+        elif change_x < 0:
+            next_position = (position[0], position[1]-1)
+            key_moves += "<"
+        elif change_y < 0:
+            next_position = (position[0]-1, position[1])
+            key_moves += "^"
         
-    print(second_robot_moves[0])    
+        position = next_position
+
+    return key_moves, end_position
+
+def part1():
     
-    me_start = (0,2)
-    position = me_start
-    me_moves = []
-    for move in second_robot_moves:
-        key_moves = ""
-        for char in move:
-            end_position = directional_pad[char]
-            while position != end_position:
-                change_y = end_position[0]-position[0]
-                change_x = end_position[1]-position[1]
-                if change_y > 0:
-                    next_position = (position[0]+1, position[1])
-                    key_moves += "v"
-                elif change_x > 0:
-                    next_position = (position[0], position[1]+1)
-                    key_moves += ">"
-                elif change_x < 0:
-                    next_position = (position[0], position[1]-1)
-                    key_moves += "<"
-                elif change_y < 0:
-                    next_position = (position[0]-1, position[1])
-                    key_moves += "^"
-                
-                position = next_position
-            key_moves += "A"
-        me_moves.append(key_moves)
-    
-    print(me_moves[0])
-    print()
-    print()
+#### Key insight: Don't need to keep the entirety of the sequence in memory. Each move, for instance
+#### "v>vA" is independent of other moves, and there are a very limited number of moves possible.
+#### Thus, just keep a count of how many times each move is needed at every level.
+
+
+    all_moves = {}
+    new_moves = []
+    for code in input_codes:
+        move_list = ""
+        position = (3,2)
+        for i, char in enumerate(code):
+            new_moves_list, position = keypad_move(position, char)
+            move_list += new_moves_list + "A"
+            # print(f"{move_list=}")
+            # print()   
+        new_moves.append(move_list)
+    all_moves["list0"] = new_moves
+
+    print("FINISHED FIRST ROBOT")
+
+    for i in range(number_of_robots):
+        print(f"Starting robot number {i+2}")
+        new_moves = []
+        for move in all_moves[f"list{i}"]:
+            move_list = ""
+            position = (0,2)
+            for char in move:
+                new_move_list, position = directional_move(position, char)
+                move_list += new_move_list + "A"
+                # print(f"{move_list=}")
+                # print()
+            new_moves.append(move_list)   
+
+        print(f"{new_moves=}")
+        all_moves[f"list{i+1}"] = new_moves
+
+  
 
     complexity = 0
-    for i, move in enumerate(me_moves):
+    for i, move in enumerate(all_moves[f"list{number_of_robots}"]):
+        complexity += len(move) * int(input_codes[i][0:-1])
         print(f"Move is {move}.")
-        print(f"Input = {input_numbers[i]} and length of me_moves = {len(move)}.")
+        print(f"Input = {input_codes[i]} and length of moves = {len(move)}.")
+        print(f"Complexity adds {int(input_codes[i][0:-1])} * {len(move)} = {int(input_codes[i][0:-1]) * len(move)}.")
+        print(f"Total complexity = {complexity}.")
         print()
-        complexity += len(move) * input_numbers[i]
+        
+    
     
     return complexity
 
 
-def part2(data):
+def part2():
     return None
 
 
