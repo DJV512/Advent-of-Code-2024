@@ -5,6 +5,9 @@ input_codes = ["029A", "980A", "179A", "456A", "379A"] #sample input numbers
 import time
 from functools import lru_cache
 
+# Copied this main2.py to make big edits but still have the originally "working"
+# version in main.py.
+
 keypad = {
         "7": (0,0),
         "8": (0,1), 

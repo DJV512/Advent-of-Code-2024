@@ -1,11 +1,6 @@
 # Input is so short this time I didn't bother to parse it, but just typed it in manually.
-#input_codes = ["029A", "980A", "179A", "456A", "379A"] #sample input numbers
-input_codes = ["780A", "539A", "341A", "189A", "682A"] #real input numbers
+input_codes = ["029A", "980A", "179A", "456A", "379A"] #sample input numbers
 
-# Copied main.py to this to make big edits but still have the originally "working"
-# version in main.py.
-
-import time
 from functools import lru_cache
 from collections import defaultdict
 
@@ -34,7 +29,7 @@ directional_pad = {
 def main():
 
     answer1 = find_complexity(2)
-    answer2 = find_complexity(25)
+    answer2 = find_complexity(24)
 
     print()
     print("--------Part 1 Answer-------------")
@@ -79,43 +74,26 @@ def directional_move(position, end_position):
 
 def find_complexity(number_of_robots):
     
-#### Key insight: Don't need to keep the entirety of the sequence in memory. Each move, for instance
-#### "v>vA" is independent of other moves, and there are a very limited number of moves possible.
-#### Thus, just keep a count of how many times each move is needed at every level.
-
-#### Next insight: I can't keep all moves together in one dictionary because at the end each code
-#### has to have it's own particular length. So I need a counter for each code.
-
-
-
     all_moves = {}
-    print(f"Starting robot number 1")
     for code in input_codes:
         all_moves[code] = defaultdict(int)
         position = (3,2)
-        for i, char in enumerate(code):
+        for char in code:
             new_move, position = keypad_move(position, char)
             all_moves[code][new_move] += 1
 
-    # print(all_moves)
 
-    # print("FINISHED FIRST ROBOT")
-
-    for i in range(number_of_robots):
-        print(f"Starting robot number {i+2}")
+    for _ in range(number_of_robots):
         newest_moves = {}
         for code in all_moves:
             newest_moves[code] = defaultdict(int)
             for move in all_moves[code]:
                 position = (0,2)
                 for char in move:
-                    # print(f"Getting move for robot {i+2}, code {code}, move {move}, and char {char}.")
                     new_move, position = directional_move(position, char)
                     newest_moves[code][new_move] += all_moves[code][move] 
             all_moves[code] = newest_moves[code]
-        # print(all_moves)
 
-  
 
     complexity = 0
     for code in all_moves:
