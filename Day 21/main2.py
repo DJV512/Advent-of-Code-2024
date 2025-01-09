@@ -1,5 +1,6 @@
 # Input is so short this time I didn't bother to parse it, but just typed it in manually.
-input_codes = ["029A", "980A", "179A", "456A", "379A"] #sample input numbers
+#input_codes = ["029A", "980A", "179A", "456A", "379A"] #sample input numbers
+input_codes = ["780A", "539A", "341A", "189A", "682A"] #real input numbers
 
 from functools import lru_cache
 from collections import defaultdict
@@ -29,7 +30,7 @@ directional_pad = {
 def main():
 
     answer1 = find_complexity(2)
-    answer2 = find_complexity(24)
+    answer2 = find_complexity(25)
 
     print()
     print("--------Part 1 Answer-------------")
@@ -44,14 +45,17 @@ def keypad_move(position, end_position):
     end_position = keypad[end_position]
     change_y = end_position[0]-position[0]
     change_x = end_position[1]-position[1]
-    if change_x > 0:
-        key_moves += change_x * ">"
+    if change_x < 0:
+        key_moves += abs(change_x) * "<"
     if change_y > 0:
         key_moves += change_y * "v"
     if change_y < 0:
         key_moves += abs(change_y) * "^" 
-    if change_x < 0:
-        key_moves += abs(change_x) * "<"
+    if change_x > 0:
+        key_moves += change_x * ">"
+    if (position[0], end_position[1]) == (3,0) or (end_position[0], position[1]) == (3,0):
+        key_moves = key_moves[::-1]
+    
 
     return key_moves+"A", end_position
 
@@ -61,15 +65,17 @@ def directional_move(position, end_position):
     end_position = directional_pad[end_position]
     change_y = end_position[0]-position[0]
     change_x = end_position[1]-position[1]
-    if change_x > 0:
-        key_moves += change_x * ">"
-    if change_y > 0:
-        key_moves += change_y * "v"
     if change_x < 0:
         key_moves += abs(change_x) * "<"
+    if change_y > 0:
+        key_moves += change_y * "v"
     if change_y < 0:
         key_moves += abs(change_y) * "^" 
-
+    if change_x > 0:
+        key_moves += change_x * ">"
+    if (position[0], end_position[1]) == (0,0) or (end_position[0], position[1]) == (0,0):
+        key_moves = key_moves[::-1]
+    
     return key_moves+"A", end_position
 
 def find_complexity(number_of_robots):
