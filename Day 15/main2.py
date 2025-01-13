@@ -1,3 +1,9 @@
+#FILENAME = "sample10.txt"
+#FILENAME = "sample9.txt"
+#FILENAME = "sample8.txt"
+#FILENAME = "sample7.txt"
+#FILENAME = "sample6.txt"
+#FILENAME = "sample5.txt"
 #FILENAME = "sample4.txt"
 #FILENAME = "sample3.txt"
 #FILENAME = "sample2.txt"
@@ -301,7 +307,8 @@ def part2(part2_map, directions):
                             box_positions.append((north_of_current[0], north_of_current[1]-1))
                 
                 if moving:
-                    for box in box_positions[::-1]:
+                    boxes_to_move = sorted(box_positions, key=lambda t: (t[0], t[1]))
+                    for box in boxes_to_move:
                         part2_map[box[0]][box[1]]="."
                         part2_map[box[0]][box[1]+1]="."
                         part2_map[box[0]-1][box[1]]="["
@@ -357,7 +364,8 @@ def part2(part2_map, directions):
                             box_positions.append((south_of_current[0], south_of_current[1]-1))
                 
                 if moving:
-                    for box in box_positions[::-1]:
+                    boxes_to_move = sorted(box_positions, key=lambda t: (t[0], t[1]))
+                    for box in boxes_to_move[::-1]:
                         part2_map[box[0]][box[1]]="."
                         part2_map[box[0]][box[1]+1]="."
                         part2_map[box[0]+1][box[1]]="["
