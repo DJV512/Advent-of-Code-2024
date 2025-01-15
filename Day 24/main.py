@@ -5,6 +5,7 @@ from collections import deque
 import time
 
 def main():
+    start = time.time()
 
     wire_values, instructions = parse_data()
 
@@ -20,6 +21,9 @@ def main():
     print("--------Part 2 Answer-------------")
     print(answer2)
     print()
+    print(f"Execution took {1000*(time.time()-start)} ms.")
+    print()
+
 
 
 def parse_data():   

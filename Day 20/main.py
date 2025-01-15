@@ -2,15 +2,17 @@
 FILENAME = "input.txt"
 
 from collections import deque
+import time
+
+# Note that this took over 10 minutes to run, but did produce the two correct answers. Must be a better way to do it!!
 
 def main():
+    start = time.time()
 
     data = parse_data()
 
-    grid_side = len(data)
-
     answer1, path, distance_to_end = part1(data)
-    answer2 = part2(path, distance_to_end, grid_side)
+    answer2 = part2(path, distance_to_end)
 
     print()
     print("--------Part 1 Answer-------------")
@@ -18,6 +20,8 @@ def main():
     print()
     print("--------Part 2 Answer-------------")
     print(answer2)
+    print()
+    print(f"Execution took {1000*(time.time()-start)} ms.")
     print()
 
 
@@ -40,7 +44,6 @@ def print_map(map):
         print()
 
 def part1(data):
-    # print_map(data)
     for y, row in enumerate(data):
         for x, item in enumerate(row):
             if item == "S":
@@ -50,26 +53,18 @@ def part1(data):
     
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
     position = start
-    # print(start)
-    # print(end)
     traveled = 0
     path = [(start,traveled)]
     visited = set()
     while position != end:
-        # print(f"Position: {position}. End: {end}")
         for direction in directions:
             new_position = (position[0]+direction[0], position[1]+direction[1])
-            # print(f"New_position: {new_position}")
             if data[new_position[0]][new_position[1]] in [".", "E"] and new_position not in visited:
                 traveled += 1
                 visited.add(new_position)
                 path.append((new_position, traveled))
                 position = new_position
                 break
-
-    # print("PATH")
-    # print(path)
-    # print()
 
     possible_cheats = []
     positions_only = [pos for pos,_ in path]
@@ -81,87 +76,58 @@ def part1(data):
                 if (new_position2, position) not in possible_cheats:
                     possible_cheats.append((position, new_position2))
 
-    # print("POSSIBLE CHEATS")
-    # print(possible_cheats)
-    # print(len(possible_cheats))
-    # print()
-
     total_distance = len(path)-1
     distance_to_end = {}
     for position, step in path:
         distance_to_end[position] = total_distance-step
 
-    # print("DISTANCE TO END")
-    # print(distance_to_end)
-    # print()
-
     big_save_cheats = 0
-    cutoff = 0
+    cutoff = 99
     for start_cheat, end_cheat in possible_cheats:
         savings = distance_to_end[start_cheat]-distance_to_end[end_cheat]-2
         if savings>cutoff:
             big_save_cheats += 1
-            # print(f"Big save cheat!! {start_cheat, end_cheat} saves {savings}!")
         
-
     return big_save_cheats, path, distance_to_end
 
 
-def part2(path, distance_to_end, grid_side):
-    print("Start part 2")
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    possible_cheats = []
+def part2(path, distance_to_end):
+    cutoff = 99
+    possible_cheats = set()
     positions_only = [pos for pos,_ in path]
     for position in positions_only:
-        best_cheat = 0
-        # print(f"Position on path to cheat from: {position}")
-        visited = set()
-        queue = deque([(position, 0)])
-        while queue:
-            next_position, distance = queue.popleft()
-            # print(f"Next position: {position}, with distance {distance}.")
-            
-            if distance > 20:
-                continue
-        
-            for direction in directions:
-                new_position = (next_position[0]+direction[0], next_position[1]+direction[1])
+        for y in range(21):
+            for x in range(21):
+                if y+x >20:
+                    break
 
-                if 0 > new_position[0] or new_position[0] >= grid_side or 0 > new_position[1] or  new_position[1] >= grid_side:
-                    continue
-                    
-                if new_position in visited:
-                    continue
-            
-                if new_position in positions_only:
-                    if (new_position, position) not in possible_cheats:
-                        cheat_distance = abs(new_position[0]-position[0])+abs(new_position[1]-position[1])
-                        if cheat_distance > best_cheat:
-                            best_cheat = cheat_distance
-                            possible_cheats.append((position, new_position))
+                landing_position1 = (position[0]+y, position[1]+x)
+                landing_position2 = (position[0]+y, position[1]-x)
+                landing_position3 = (position[0]-y, position[1]+x)
+                landing_position4 = (position[0]-y, position[1]-x)
 
+                if landing_position1 in positions_only:
+                    savings = distance_to_end[position] - distance_to_end[landing_position1] - y - x
+                    if savings > cutoff:
+                        possible_cheats.add(((position, landing_position1), savings))
                 
-                visited.add(new_position)
-                queue.append((new_position, distance + 1))
+                if landing_position2 in positions_only:
+                    savings = distance_to_end[position] - distance_to_end[landing_position2] - y - x
+                    if savings > cutoff:
+                        possible_cheats.add(((position, landing_position2), savings))
+
+                if landing_position3 in positions_only:
+                    savings = distance_to_end[position] - distance_to_end[landing_position3] - y - x
+                    if savings > cutoff:
+                        possible_cheats.add(((position, landing_position3), savings))
+
+                if landing_position4 in positions_only:
+                    savings = distance_to_end[position] - distance_to_end[landing_position4] - y - x
+                    if savings > cutoff:
+                        possible_cheats.add(((position, landing_position4), savings))
 
 
-
-    # print("POSSIBLE CHEATS")
-    # print(possible_cheats)
-    print(f"Total possible cheats: {len(possible_cheats)}.")
-    # print()
-
-    big_save_cheats = 0
-    cutoff = 49
-    for start_cheat, end_cheat in possible_cheats:
-        cheat_distance = abs(start_cheat[0]-end_cheat[0])+abs(start_cheat[1]-end_cheat[1])
-        savings = distance_to_end[start_cheat]-distance_to_end[end_cheat] - cheat_distance
-        # print(f"Start cheat: {start_cheat}, end cheat: {end_cheat}, cheat distance: {cheat_distance}, savings {savings}.")
-        if savings>cutoff:
-            big_save_cheats += 1
-            # print(f"Big save cheat!! {start_cheat, end_cheat} saves {savings}!")
-
-    return big_save_cheats
+    return len(possible_cheats)
 
 
 
