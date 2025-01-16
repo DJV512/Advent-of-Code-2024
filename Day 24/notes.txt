@@ -1,4 +1,0 @@
-bcp XOR rgc -> z08
-swt OR ghb -> rgc
-rvc AND kpv -> ghb
-y07 XOR x07 -> kpv
